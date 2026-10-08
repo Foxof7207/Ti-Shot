@@ -1,0 +1,19 @@
+#!/bin/bash
+# tishot - capture d'écran d'une TI-Nspire via USB
+# Copyright (C) 2026 Foxof7207
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version. This program is distributed WITHOUT ANY WARRANTY; see LICENSE.
+# Capture l'écran d'une TI-Nspire (USB) -> ~/Pictures/ti-AAAAMMJJ-HHMMSS.png
+set -e
+out="${1:-$HOME/Pictures/ti-$(date +%Y%m%d-%H%M%S).png}"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+cd "$tmp"
+~/.local/share/tishot/shot 2>/dev/null || { echo "Échec: calculatrice branchée et allumée ?" >&2; exit 1; }
+python3 -I -c "
+from PIL import Image
+Image.open('screen.ppm').resize((640,480)).save('$out')"
+echo "$out"
